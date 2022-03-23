@@ -17,14 +17,14 @@ def MSE(X, y, theta, lambda_):
     error = X @ theta - y
 
     # J is kept track of for debugging purposes
-    J = 1 / m * (error @ error.T / 2 + lambda_ * theta[1:] @ theta[1:].T)
+    J = 1 / (2*m) * ((error @ error) + lambda_ * theta[1:] @ theta[1:])
 
-    gradient[1:] = 1 / m * (X[:, 1:].T @ error + lambda_ * theta[1:])
-    gradient[0] = 1 / m * X[:, 0].T @ error
+    gradient = 1 / m * X.T @ error
+    gradient[1:] += 1 / m * (lambda_ * theta[1:])
     return J, gradient
 
 
-def linear_regression(X, y, initial_theta, alpha, lambda_=0.0, iterations=10000):
+def linear_regression(X, y, initial_theta, alpha, lambda_=0.0, iterations=50000):
     # the number of training examples
     m = X.shape[0]
 
@@ -54,3 +54,30 @@ def linear_regression(X, y, initial_theta, alpha, lambda_=0.0, iterations=10000)
     theta[1:] = theta[1:] / sigma
 
     return theta
+
+
+def polynomial_regression(X, y, initial_theta, p, alpha, lambda_=0.0, iterations=50000):
+    # returns the polynomial coefficients that minimize the MSE
+    X_p = get_polynomial_features(X, p)
+    return linear_regression(X_p, y, initial_theta, alpha, lambda_, iterations)
+
+
+def get_polynomial_features(X, p):
+    # returns the design matrix X with polynomial
+    # features added up to degree p
+    X_p = np.zeros((X.shape[0], p))
+    for i in range(1, p + 1):
+        X_p[:, i - 1] = (X**i).ravel()
+
+    return X_p
+
+
+def plot_graph(theta, min, max):
+
+    number = int((max - min)//0.001)
+    x_axis = np.linspace(min, max, number)
+
+    x = np.concatenate([np.ones((x_axis.shape[0], 1)), get_polynomial_features(
+        x_axis, theta.shape[0] - 1)], axis=1)
+
+    plt.plot(x_axis, x @ theta)
