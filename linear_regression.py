@@ -112,6 +112,11 @@ def linear_regression_BS(X, y, initial_theta, iterations=100, epsilon=0.00001):
     return (right_bound + left_bound) / 2
 
 
+def polynomial_regression_BS(X, y, initial_theta, p, iterations=100, epsilon=0.00001):
+    X_p = get_polynomial_features(X, p)
+    return linear_regression_BS(X_p, y, initial_theta, iterations, epsilon)
+
+
 def get_slope_direction(X, y, theta, epsilon):
     # returns True for right, False for left
     error_left, _ = MSE(X, y, theta - epsilon, 0)
@@ -132,11 +137,11 @@ def plot_graph(theta, min, max):
 
 #################### SAMPLE TEST EXAMPLE #####################
 X = np.arange(10).reshape(-1, 1) + np.random.random((10, 1))*5
-y = 5 * np.arange(10) + 7
+y = 2 * np.arange(10)**2 + 5 * np.arange(10) + 7
 
-initial_theta = np.zeros(2)
+initial_theta = np.zeros(3)
 
-theta = linear_regression_BS(X, y, initial_theta)
+theta = polynomial_regression_BS(X, y, initial_theta, 2)
 
 min = np.min(X)
 max = np.max(X)
