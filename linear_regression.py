@@ -72,6 +72,53 @@ def get_polynomial_features(X, p):
     return X_p
 
 
+def linear_regression_BS(X, y, initial_theta, iterations=100, epsilon=0.00001):
+
+    # an experiment to see how well a divide and conquer approach works for linear search
+    # still has a bunch of bugs and undefined behaviour associated with it that could be fixed
+    # conclusion: the gradient descent method is much more reliable and efficient, even for
+    #             something as simple as linear regression
+
+    m = X.shape[0]
+    X = np.concatenate([np.ones((m, 1)), X], axis=1)
+    theta = initial_theta
+
+    initial_direction = get_slope_direction(X, y, theta, epsilon)
+    left_bound = np.zeros(theta.shape)
+    right_bound = np.zeros(theta.shape)
+
+    # getting the left and right bounds
+    while True:
+        if initial_direction:
+            theta2 = theta + (np.random.random(theta.shape)) * max(y)
+            if get_slope_direction(X, y, theta2, epsilon) != initial_direction:
+                right_bound = theta2
+                left_bound = theta
+                break
+        else:
+            theta2 = theta - (np.random.random(theta.shape)) * max(y)
+            if get_slope_direction(X, y, theta2, epsilon) != initial_direction:
+                left_bound = theta2
+                right_bound = theta
+                break
+
+    for _ in range(iterations):
+        mid = (left_bound + right_bound) / 2
+        if get_slope_direction(X, y, mid, epsilon):
+            left_bound = mid
+        else:
+            right_bound = mid
+
+    return (right_bound + left_bound) / 2
+
+
+def get_slope_direction(X, y, theta, epsilon):
+    # returns True for right, False for left
+    error_left, _ = MSE(X, y, theta - epsilon, 0)
+    error_right, _ = MSE(X, y, theta + epsilon, 0)
+    return error_left > error_right
+
+
 def plot_graph(theta, min, max):
 
     number = int((max - min)//0.001)
@@ -81,3 +128,18 @@ def plot_graph(theta, min, max):
         x_axis, theta.shape[0] - 1)], axis=1)
 
     plt.plot(x_axis, x @ theta)
+
+
+#################### SAMPLE TEST EXAMPLE #####################
+X = np.arange(10).reshape(-1, 1) + np.random.random((10, 1))*5
+y = 5 * np.arange(10) + 7
+
+initial_theta = np.zeros(2)
+
+theta = linear_regression_BS(X, y, initial_theta)
+
+min = np.min(X)
+max = np.max(X)
+plt.plot(X, y, "ro")
+plot_graph(theta, min, max)
+plt.show()
