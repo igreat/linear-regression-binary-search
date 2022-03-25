@@ -88,19 +88,16 @@ def linear_regression_BS(X, y, initial_theta, iterations=100, epsilon=0.00001):
     right_bound = np.zeros(theta.shape)
 
     # getting the left and right bounds
-    while True:
-        if initial_direction:
-            theta2 = theta + (np.random.random(theta.shape)) * max(y)
-            if get_slope_direction(X, y, theta2, epsilon) != initial_direction:
-                right_bound = theta2
-                left_bound = theta
-                break
-        else:
-            theta2 = theta - (np.random.random(theta.shape)) * max(y)
-            if get_slope_direction(X, y, theta2, epsilon) != initial_direction:
-                left_bound = theta2
-                right_bound = theta
-                break
+    if initial_direction:
+        theta2 = theta + np.max(y) * 10000
+        if get_slope_direction(X, y, theta2, epsilon) != initial_direction:
+            right_bound = theta2
+            left_bound = theta
+    else:
+        theta2 = theta - np.max(y) * 10000
+        if get_slope_direction(X, y, theta2, epsilon) != initial_direction:
+            left_bound = theta2
+            right_bound = theta
 
     for _ in range(iterations):
         mid = (left_bound + right_bound) / 2
